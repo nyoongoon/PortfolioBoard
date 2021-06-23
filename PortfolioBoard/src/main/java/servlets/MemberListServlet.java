@@ -6,25 +6,27 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import javax.servlet.GenericServlet;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/member/list")
-public class MemberListServlet extends GenericServlet{
+public class MemberListServlet extends HttpServlet{
 	@Override
-	public void service(ServletRequest request, ServletResponse response) throws ServletException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+			ServletContext sc = this.getServletContext();
+			Class.forName(sc.getInitParameter("driver"));
 			conn = DriverManager.getConnection(
-					"jdbc:mysql://localhost/studydb",
-					"root",
-					"tjrqls29"
+					sc.getInitParameter("url"),
+					sc.getInitParameter("username"),
+					sc.getInitParameter("password")
 					);
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(
@@ -38,9 +40,12 @@ public class MemberListServlet extends GenericServlet{
 			while(rs.next()) {
 				out.println(
 						rs.getInt("MNO") + ", " +
-						rs.getString("MNAME") + ", " +
+						"<a href='update?no=" + rs.getInt("MNO") + "'>" +
+						rs.getString("MNAME") + ", " + "</a>" +
 						rs.getString("EMAIL") + ", " +
-						rs.getDate("CRE_DATE") + "<br>"
+						rs.getDate("CRE_DATE") + ", " +
+						"<a href='delete?no=" + rs.getInt("MNO") + "'>" +
+						"[삭제] </a><br>"
 						);
 			}
 			out.println("</body></html>");

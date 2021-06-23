@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -41,11 +42,12 @@ public class MemberAddServlet extends HttpServlet {
 		PreparedStatement stmt = null; //db에 보낼 sql문을 담을 객체
 	
 		try {
-			DriverManager.registerDriver(new com.mysql.jdbc.Driver()); //드라이버 객체 생성
+			ServletContext sc = this.getServletContext();
+			Class.forName(sc.getInitParameter("driver"));//드라이버 객체 생성
 			conn = DriverManager.getConnection(//생성한 sql드라이버로 dbms에 연결하고, 연결정보를 반환받음
-							"jdbc:mysql://localhost/studydb",
-							"root",
-							"tjrqls29");
+							sc.getInitParameter("url"),
+							sc.getInitParameter("username"),
+							sc.getInitParameter("password"));
 			stmt = conn.prepareStatement(
 							"INSERT INTO MEMBERS(EMAIL, PWD, MNAME, CRE_DATE, MOD_DATE)"
 						+	" VALUES(?, ?, ?, NOW(), NOW())");
@@ -53,13 +55,8 @@ public class MemberAddServlet extends HttpServlet {
 			stmt.setString(2,  request.getParameter("password"));
 			stmt.setString(3,  request.getParameter("name"));
 			stmt.executeUpdate(); //서버에 sql문 날리기
+			response.sendRedirect("list");
 			
-			response.setContentType("text/html; charset=UTF-8");
-			PrintWriter out = response.getWriter();
-			out.println("<html><head><title>회원등록결과</title></head>");
-			out.println("<body>");
-			out.println("<p> 등록 성공입니다! </p>");
-			out.println("</body></html>");
 		}catch(Exception e) {
 			throw new ServletException(e);
 		}finally {
