@@ -33,7 +33,7 @@ public class MemberDeleteServlet extends HttpServlet {
 			stmt.executeUpdate();
 			response.sendRedirect("list");
 		}catch(Exception e) {
-			
+			request.getRequestDispatcher("/Error.jsp");
 		}finally {
 			try {if(stmt != null) stmt.close();} catch(Exception e) {}
 			try {if(conn != null) stmt.close();} catch(Exception e) {}

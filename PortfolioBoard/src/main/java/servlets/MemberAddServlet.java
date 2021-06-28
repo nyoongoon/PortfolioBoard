@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,22 +22,11 @@ public class MemberAddServlet extends HttpServlet {
    
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html; charset=UTF-8");
-		PrintWriter out = response.getWriter();
-		out.println("<html><head><tittle>회원등록</title></head>");
-		out.println("<body><h1>회원등록</h1>");
-		out.println("<form action='add' method='post'>");
-		out.println("이름: <input type='text' name='name'><br>");
-		out.println("이메일: <input type='text' name='email'><br>");
-		out.println("암호: <input type='password' name='password'><br>");
-		out.println("<input type = 'submit' value='추가'>");
-		out.println("<input type = 'reset' value='취소'>");
-		out.println("</form>");
-		out.println("</body></html>");
-			
+		RequestDispatcher rd = request.getRequestDispatcher("/member/MemberForm.jsp");
+		rd.forward(request, response);
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setCharacterEncoding("UTF-8");
 		
 		Connection conn = null; //DB 접속 정보 --createStatement()를 통해 Statement 인터페이스 구현체 반환받음.
 		PreparedStatement stmt = null; //db에 보낼 sql문을 담을 객체
@@ -58,7 +48,7 @@ public class MemberAddServlet extends HttpServlet {
 			response.sendRedirect("list");
 			
 		}catch(Exception e) {
-			throw new ServletException(e);
+			request.getRequestDispatcher("/Error.jsp");
 		}finally {
 			try {if(stmt!=null)stmt.close();}catch(Exception e) {}
 			try {if(conn!=null)conn.close();}catch(Exception e) {}
