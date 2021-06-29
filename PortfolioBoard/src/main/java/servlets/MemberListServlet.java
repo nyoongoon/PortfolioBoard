@@ -2,7 +2,6 @@ package servlets;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import dao.MemberDao;
 import vo.Member;
 
 @WebServlet("/member/list")
@@ -28,22 +28,11 @@ public class MemberListServlet extends HttpServlet{
 		try {
 		
 			ServletContext sc = this.getServletContext();
-			conn = (Connection)sc.getAttribute("conn");
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(
-					"select MNO, MNAME, EMAIL, CRE_DATE" + " from MEMBERS " 
-			+ "order by MNO ASC");
-			response.setContentType("text/html; charset=UTF-8");
-			ArrayList<Member> members = new ArrayList<Member>();
-			while(rs.next()) {
-				members.add(new Member().setNo(rs.getInt("MNO"))
-													.setName(rs.getString("MNAME"))
-													.setEmail(rs.getString("EMAIL"))
-													.setCreatedDate(rs.getDate("CRE_DATE")));
-			}
-			//request에 회원 목록 데이터 보관
-			request.setAttribute("members", members);
+			MemberDao memberDao = (MemberDao)sc.getAttribute("memberDao");
 			
+			request.setAttribute("members", memberDao.selectList());
+			
+			response.setContentType("text/html; charset=UTF-8");
 			//JSP로 출력을 위임.
 			RequestDispatcher rd = request.getRequestDispatcher(
 						"/member/MemberList.jsp");
