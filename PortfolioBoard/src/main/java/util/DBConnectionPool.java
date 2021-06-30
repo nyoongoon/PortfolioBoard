@@ -1,4 +1,4 @@
-package servlets;
+package util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,19 +9,20 @@ public class DBConnectionPool {
 	String username;
 	String password;
 	ArrayList<Connection> connList = new ArrayList<Connection>();
-
-	public DBConnectionPool(String driver, String url, String username, String password) throws Exception {
+	
+	public DBConnectionPool(String driver, String url, 
+			String username, String password)throws Exception{
 		this.url = url;
 		this.username = username;
 		this.password = password;
-
+	
 		Class.forName(driver);
 	}
-
-	public Connection getConnection() throws Exception {
-		if (connList.size() > 0) {
+	
+	public Connection getConnection() throws Exception{
+		if(connList.size()>0) {
 			Connection conn = connList.get(0);
-			if (conn.isValid(10)) {	//DB커넥션 객체도 일정 시간이 지나면 서버와의 연결이 끊어지기 때문에, 유효성 체크를 한 다음에 반
+			if(conn.isValid(10)) {
 				return conn;
 			}
 		}
@@ -33,9 +34,8 @@ public class DBConnectionPool {
 	}
 	
 	public void closeAll() {
-		for(Connection conn : connList) {
-			try {conn.close();}catch(Exception e) {}
+		for(Connection conn: connList) {
+			try {conn.close();} catch(Exception e) {}
 		}
 	}
-
 }

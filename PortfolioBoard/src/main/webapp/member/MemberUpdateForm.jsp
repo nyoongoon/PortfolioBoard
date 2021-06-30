@@ -16,8 +16,8 @@
 		가입일: ${member.createdDate}<br> 
 		<input type='submit' value='저장'>
 		<input type='button' value='삭제'
-			onclick='location.href="delete?no= ${member.no}";'> <input
-			type='button' value='취소' onclick='location.href=list'>
+			onclick='location.href="delete?no= ${member.no}";'> 
+		<input type='button' value='취소' onclick='location.href="list"'>
 	</form>
 </body>
 </html>

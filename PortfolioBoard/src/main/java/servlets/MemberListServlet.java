@@ -22,7 +22,6 @@ public class MemberListServlet extends HttpServlet{
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
@@ -31,18 +30,10 @@ public class MemberListServlet extends HttpServlet{
 			MemberDao memberDao = (MemberDao)sc.getAttribute("memberDao");
 			
 			request.setAttribute("members", memberDao.selectList());
-			
-			response.setContentType("text/html; charset=UTF-8");
-			//JSP로 출력을 위임.
-			RequestDispatcher rd = request.getRequestDispatcher(
-						"/member/MemberList.jsp");
-			rd.include(request, response);
-			
+			// JSP URL 정보를 프론트 컨트롤러에 알려주
+			request.setAttribute("viewUrl", "/member/MemberList.jsp");
 		}catch(Exception e) {
-			request.setAttribute("error", e);
-			RequestDispatcher rd = request.getRequestDispatcher("/Error.jsp");
-			rd.forward(request, response);
-			
+			throw new ServletException(e);
 		}finally {
 			try {if(rs!=null)rs.close();}catch(Exception e) {}
 			try {if(stmt!=null)stmt.close();}catch(Exception e) {}

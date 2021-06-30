@@ -1,30 +1,30 @@
 package listeners;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.SQLException;
 
+import javax.naming.InitialContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import javax.sql.DataSource;
 
 import dao.MemberDao;
 
 @WebListener
 public class ContextLoaderListener implements ServletContextListener {
-	Connection conn;
+	
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		try {
 			ServletContext sc = event.getServletContext();
-			Class.forName(sc.getInitParameter("driver"));
-			Connection conn = DriverManager.getConnection(
-							sc.getInitParameter("url"),
-							sc.getInitParameter("username"),
-							sc.getInitParameter("password"));
+			InitialContext initialContext = new InitialContext();
+			DataSource ds = (DataSource)initialContext.lookup(
+					//서버 자원의 JNDI이름
+					"java:comp/env/jdbc/studydb");
 			
 			MemberDao memberDao = new MemberDao();
-			memberDao.setConnection(conn);
+			memberDao.setDataSource(ds);
 			
 			sc.setAttribute("memberDao", memberDao);
 			
@@ -35,8 +35,6 @@ public class ContextLoaderListener implements ServletContextListener {
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		try {
-			conn.close();
-		}catch(Exception e) {}
+		
 	}
 }

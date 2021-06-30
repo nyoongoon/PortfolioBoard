@@ -7,19 +7,25 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import vo.Member;
 
 public class MemberDao {
-	Connection connection;
-
-	public void setConnection(Connection connection) {
-		this.connection = connection;
+	
+	DataSource ds;
+	
+	public void setDataSource(DataSource ds) {
+		this.ds = ds;
 	}
+	
 
 	public List<Member> selectList() throws Exception {
+		Connection connection = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
+			connection = ds.getConnection();
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("SELECT MNO, MNAME, EMAIL, CRE_DATE" + " FROM MEMBERS" + " ORDER BY MNO ASC");
 			ArrayList<Member> members = new ArrayList<Member>();
@@ -41,12 +47,19 @@ public class MemberDao {
 					stmt.close();
 			} catch (Exception e) {
 			}
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
 	public void insert(Member member) throws Exception {
+		Connection connection = null;
 		PreparedStatement pstmt = null;
 		try {
+			connection = ds.getConnection();
 			pstmt = connection.prepareStatement(
 					"INSERT INTO MEMBERS(EMAIL, PWD, MNAME, CRE_DATE, MOD_DATE)" + " VALUES(?, ?, ?, NOW(), NOW())");
 			pstmt.setString(1, member.getEmail());
@@ -62,12 +75,19 @@ public class MemberDao {
 					pstmt.close();
 			} catch (Exception e) {
 			}
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
 	public void delete(int no) throws Exception {
+		Connection connection = null;
 		Statement stmt = null;
 		try {
+			connection = ds.getConnection();
 			stmt = connection.createStatement();
 			stmt.executeUpdate("DELETE FROM MEMBERS WHERE MNO =" + no);
 
@@ -80,13 +100,20 @@ public class MemberDao {
 					stmt.close();
 			} catch (Exception e) {
 			}
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
 	public Member selectOne(int no) throws Exception {
+		Connection connection = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
+			connection = ds.getConnection();
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("select MNO, EMAIL, MNAME, CRE_DATE from MEMBERS" + " where MNO=" + no);
 			rs.next();
@@ -107,12 +134,19 @@ public class MemberDao {
 					stmt.close();
 			} catch (Exception e) {
 			}
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 
 	public void update(Member member) throws Exception {
+		Connection connection = null;
 		PreparedStatement pstmt = null;
 		try {
+			connection = ds.getConnection();
 			pstmt = connection.prepareStatement("UPDATE MEMBERS SET EMAIL=?, MNAME=?, MOD_DATE=now()" + " WHERE MNO=?");
 			pstmt.setString(1, member.getEmail());
 			pstmt.setString(2, member.getName());
@@ -120,6 +154,7 @@ public class MemberDao {
 			pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
+			pstmt.setString(1, member.getEmail());
 			throw e;
 		} finally {
 			try {
@@ -127,13 +162,20 @@ public class MemberDao {
 					pstmt.close();
 			} catch (Exception e) {
 			}
+			try {
+				if (connection != null)
+					connection.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 	
 	public Member exist(String email, String password)throws Exception{
+		Connection connection = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
+		connection = ds.getConnection();
 		pstmt = connection.prepareStatement("SELECT MNAME, EMAIL FROM MEMBERS WHERE EMAIL=? AND PWD=?");
 		pstmt.setString(1, email);
 		pstmt.setString(2, password);
@@ -153,6 +195,10 @@ public class MemberDao {
 			try {
 				if (pstmt != null)
 					pstmt.close();
+			} catch (Exception e) {
+			}try {
+				if (connection != null)
+					connection.close();
 			} catch (Exception e) {
 			}
 		}

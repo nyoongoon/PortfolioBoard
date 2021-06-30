@@ -32,8 +32,6 @@ public class MemberUpdateServlet extends HttpServlet{
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-		PreparedStatement stmt = null;
-		
 			try {
 				response.setContentType("text/html; charset=UTF-8");
 				ServletContext sc = this.getServletContext();
@@ -46,8 +44,6 @@ public class MemberUpdateServlet extends HttpServlet{
 				response.sendRedirect("list");
 			}catch(Exception e) {
 				request.getRequestDispatcher("/Error.jsp");
-			}finally {
-				try {if(stmt != null) stmt.close();} catch(Exception e) {}
 			}
 	}
 }
