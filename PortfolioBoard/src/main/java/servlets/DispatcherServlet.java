@@ -1,14 +1,23 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import controls.Controller;
+import controls.LogInController;
+import controls.LogOutController;
+import controls.MemberAddController;
+import controls.MemberDeleteController;
+import controls.MemberListController;
+import controls.MemberUpdateController;
 import vo.Member;
 
 @WebServlet("*.do")
@@ -21,43 +30,49 @@ public class DispatcherServlet extends HttpServlet {
 		//요청 URL에서 서블릿 경로 추출하기
 		String servletPath = request.getServletPath();
 		try {
-			String pageControllerPath = null;
+			ServletContext sc = this.getServletContext();
+			HashMap<String, Object> model = new HashMap<String, Object>();
+			model.put("session", request.getSession());
+			
+			Controller pageController = (Controller) sc.getAttribute(servletPath);
+					
 			// 요청 URL에서 서블릿 경로 알아내기
 			if("/member/list.do".equals(servletPath)) {
-				pageControllerPath = "/member/list";
 			}else if("/member/add.do".equals(servletPath)) {
-				pageControllerPath = "/member/add";
 				if(request.getParameter("email") != null) {
-					request.setAttribute("member", new Member()
+					model.put("member", new Member()
 						.setEmail(request.getParameter("email"))
 						.setPassword(request.getParameter("password"))
 						.setName(request.getParameter("name")));
 				}
 			}else if("/member/update.do".equals(servletPath)) {
-				pageControllerPath = "/member/update";
-				if(request.getParameter("mail")!=null) {
-					request.setAttribute("member", new Member()
+				if(request.getParameter("email")!=null) {
+					model.put("member", new Member()
 							.setEmail(request.getParameter("email"))
 							.setNo(Integer.parseInt(request.getParameter("no")))
 							.setName(request.getParameter("name")));
+				}else {
+					model.put("no", new Integer(request.getParameter("no")));
 				}
 			}else if("/member/delete.do".equals(servletPath)) {
-				pageControllerPath = "/member/delete";
+				model.put("no", new Integer(request.getParameter("no")));
 			}else if("/auth/login.do".equals(servletPath)) {
-				pageControllerPath = "auth/login";
-			}else if("/auth/logout.do".equals(servletPath)) {
-				pageControllerPath = "auth/logout";
+				if(request.getParameter("email")!=null) {
+					model.put("loginInfo", new Member()
+							.setEmail(request.getParameter("email"))
+							.setPassword(request.getParameter("password")));
+				}
 			}
-			//페이지 컨트롤러로 위임	
-			RequestDispatcher rd = request.getRequestDispatcher(pageControllerPath);
-			rd.include(request, response);
-			//JSP로 위임
-			String viewUrl = (String) request.getAttribute("viewUrl");
+			String viewUrl = pageController.execute(model);
+			
+			for(String key : model.keySet()) {
+				request.setAttribute(key,  model.get(key));
+			}
 			if(viewUrl.startsWith("redirect:")) {
 				response.sendRedirect(viewUrl.substring(9));
 				return;
 			}else {
-				rd = request.getRequestDispatcher(viewUrl);
+				RequestDispatcher rd = request.getRequestDispatcher(viewUrl);
 				rd.include(request, response);
 			}
 		}catch(Exception e) {
